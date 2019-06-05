@@ -1,49 +1,67 @@
-#include <string.h>  
-#include <stdio.h>  
-#include <stdlib.h>  
-#include <unistd.h>  
-#include <sys/select.h>  
-#include <sys/time.h>  
-#include <sys/socket.h>  
-#include <netinet/in.h>  
-#include <arpa/inet.h>  
-#include <sys/epoll.h>  
-  
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <assert.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/epoll.h>
+#include <pthread.h>
+#include "tinyEpoll.h"
+
+#define MAX_EVENT_NUMBER 1024
+#define TCP_BUFFER_SIZE 512
+#define UDP_BUFFER_SIZE 1024
+
+int setnonblocking(int fd)
+{
+    int old_option = fcntl(fd,F_GETFL);
+    int new_option = old_option | O_NONBLOCK;
+    fcntl(fd, F_SETFL, new_option);
+    return old_option;
+}
+
+void addfd(int epollfd, int fd)
+{
+    struct epoll_event event;
+    event.data.fd = fd;
+    event.events = EPOLLIN;
+    epoll_ctl( epollfd, EPOLL_CTL_ADD, fd, &event );
+    setnonblocking( fd );
+}
 int main(int argc,char *argv[])  
 {  
-    int udpfd = 0;  
     int ret = 0;  
-    struct sockaddr_in saddr;  
-    struct sockaddr_in caddr;  
-  
+    struct sockaddr_in saddr;   
     bzero(&saddr,sizeof(saddr));  
     saddr.sin_family = AF_INET;  
     saddr.sin_port   = htons(8000);  
     saddr.sin_addr.s_addr = htonl(INADDR_ANY);  
       
-    bzero(&caddr,sizeof(caddr));  
-    caddr.sin_family  = AF_INET;  
-    caddr.sin_port    = htons(8000);  
-      
     //创建套接字  
-    if( (udpfd = socket(AF_INET,SOCK_DGRAM, 0)) < 0)  
+    int listenfd = socket( PF_INET, SOCK_STREAM, 0 );
+    if( listenfd < 0)  
     {  
         perror("socket error");  
         exit(-1);  
     }  
       
     //套接字端口绑字  
-    if(bind(udpfd, (struct sockaddr*)&saddr, sizeof(saddr)) != 0)  
+    if(bind(listenfd, (struct sockaddr*)&saddr, sizeof(saddr)) != 0)  
     {  
         perror("bind error");  
-        close(udpfd);         
+        close(listenfd);         
         exit(-1);  
     }  
   
-    printf("input: \"sayto 192.168.220.X\" to sendmsg to somebody\033[32m\n");    
+   // printf("input: \"sayto 192.168.220.X\" to sendmsg to somebody\033[32m\n");    
     struct epoll_event event;   // 告诉内核要监听什么事件    
     struct epoll_event wait_event;    
-        
+    struct epoll_event events[ MAX_EVENT_NUMBER ];  
     int epfd = epoll_create(10); // 创建一个 epoll 的句柄，参数要大于 0， 没有太大意义    
     if( -1 == epfd ){    
         perror ("epoll_create");    
