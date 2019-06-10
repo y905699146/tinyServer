@@ -13,6 +13,8 @@
 #include <pthread.h>
 #include "tinyEpoll.h"
 
+
+//using namespace TinyServer;
 #define MAX_EVENT_NUMBER 1024
 #define TCP_BUFFER_SIZE 512
 #define UDP_BUFFER_SIZE 1024
@@ -38,35 +40,20 @@ int main(int argc,char *argv[])
 {  
     const char* ip= argv[1];;
     const char* port= argv[2];
-    int ret = 0;  
-
-    struct sockaddr_in saddr;   
-    bzero(&saddr,sizeof(saddr));  
-    saddr.sin_family = AF_INET;  
-    saddr.sin_port   = htons(8000);  
-    saddr.sin_addr.s_addr = htonl(INADDR_ANY);  
-      
-    //创建套接字  
-    int listenfd = socket( AF_INET, SOCK_STREAM, 0 );
-    if( listenfd < 0)  
-    {  
-        perror("socket error");  
-        exit(-1);  
-    }  
-      
-    //套接字端口绑字  
-    if(bind(listenfd, (struct sockaddr*)&saddr, sizeof(saddr)) != 0)  
-    {  
-        perror("bind error");  
-        close(listenfd);         
-        exit(-1);  
-    }  
-
-    if (listen(listenfd, 5) == -1) {
-        perror("listen error");
-        exit(1);
+    printf(ip,port);
+    TinyServer::TinyEpoll* tinyServer =new TinyServer::TinyEpoll();
+    int ret = tinyServer->CreateSocket();
+    if (ret == -1) {
+        return ret;
     }
-
+    ret = tinyServer->Bind(ip,8000);
+    if (ret == -1) {
+        return ret;
+    }
+    ret = tinyServer->Listen(5);
+    if (ret == -1) {
+        return ret;
+    }
     struct epoll_event events[ MAX_EVENT_NUMBER ];  
     int epfd = epoll_create(5); // 创建一个 epoll 的句柄，参数要大于 0， 没有太大意义    
     if( -1 == epfd ){    
@@ -81,7 +68,7 @@ int main(int argc,char *argv[])
         perror("epoll_ctl");  
         return -1;  
     }    
-    addfd(epfd,listenfd);
+    addfd(epfd,tinyServer->GetScoketfd());
 
     while(1)  
     {     
@@ -103,11 +90,11 @@ int main(int argc,char *argv[])
                     continue;
                 } 
                 int sockfd = events[i].data.fd;
-                if ( sockfd == listenfd)
+                if ( sockfd == tinyServer->GetScoketfd())
                 {
                     struct sockaddr_in client_address;
                     socklen_t client_addrlength = sizeof( client_address );
-                    int connfd = accept( listenfd, ( struct sockaddr* )&client_address, &client_addrlength );
+                    int connfd = accept( tinyServer->GetScoketfd(), ( struct sockaddr* )&client_address, &client_addrlength );
                     if(connfd<0)
                     {
                         perror("accept err \n");
@@ -119,7 +106,7 @@ int main(int argc,char *argv[])
                 {
                     if(events[i].events & EPOLLIN)
                     {
-                        char *buf[10240];
+                        const char *buf[10240];
                         ssize_t s = read(sockfd, buf, sizeof(buf)-1);
                         if(s>0)
                         {

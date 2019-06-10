@@ -17,28 +17,40 @@ using namespace TinyServer;
 
 int TinyEpoll::CreateSocket()
 {
-    this.Socketfd = socket( AF_INET, SOCK_STREAM, 0 );
-    if( this.Socketfd < 0)  
+    Socketfd = ::socket( AF_INET, SOCK_STREAM, 0 );
+    if( this->Socketfd < 0)  
     {  
         perror("socket error");  
         exit(-1);  
     } 
 }
-int TinyEpoll::Listen(int backlog = SOMAXCONN) const
+int TinyEpoll::Listen(int backlog)
 {
-    int ret = ::listen(this.Socketfd,backlog);
+    int ret = ::listen(Socketfd,backlog);
     if (ret<0)
     {
         perror("listen error");  
         exit(-1);  
     }
+    return 0;
 }
 
 int TinyEpoll::Bind(const char* ip,unsigned short int port) const{
     struct sockaddr_in saddr;
     saddr.sin_family = AF_INET;  
     saddr.sin_port   = htons(port);  
-    inet_pton(AF_INET,ip,&serv_addr.sin_addr); 
+    inet_pton(AF_INET,ip,&saddr.sin_addr); 
+    int ret = ::bind(Socketfd, (struct sockaddr*)&saddr, sizeof(saddr));
+    if(ret<0)
+    {
+        perror("bind error");  
+        exit(-1); 
+    }
+    return 0;
+}
+
+int TinyEpoll::GetScoketfd() const{
+    return Socketfd;
 }
 void Cal(int a,int b){
     printf("%d",a+b);

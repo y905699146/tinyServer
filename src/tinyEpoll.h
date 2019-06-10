@@ -1,7 +1,7 @@
 #pragma once
 
 namespace TinyServer{
-
+    #define SOMAXCONN 128
     class TinyEpoll{
     public:
         int epfd;
@@ -10,9 +10,10 @@ namespace TinyServer{
         explicit TinyEpoll():Socketfd(0){};
         int CreateSocket() ;
         int Bind(const char* ip,unsigned short int port) const;
-        int Listen(int backlog = MaxConn) const;
+        int Listen(int backlog = SOMAXCONN);
         int Accept() const;
         int Connect();
+        int GetScoketfd() const;
         bool isValid() const; 
     private:
         int Socketfd;
