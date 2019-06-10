@@ -52,6 +52,14 @@ int TinyEpoll::Bind(const char* ip,unsigned short int port) const{
 int TinyEpoll::GetScoketfd() const{
     return Socketfd;
 }
-void Cal(int a,int b){
-    printf("%d",a+b);
+
+int TinyEpoll::Accept() const{
+    struct sockaddr_in client_address;
+    socklen_t client_addrlength = sizeof( client_address );
+    int connfd = ::accept(Socketfd,( struct sockaddr* )&client_address,&client_addrlength);
+    if(connfd<0)
+    {
+        perror("accept err \n");
+    }
+    return connfd;
 }

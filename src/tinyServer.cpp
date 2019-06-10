@@ -1,6 +1,4 @@
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <assert.h>
 #include <stdio.h>
@@ -46,7 +44,7 @@ int main(int argc,char *argv[])
     if (ret == -1) {
         return ret;
     }
-    ret = tinyServer->Bind(ip,8000);
+    ret = tinyServer->Bind(ip,12345);
     if (ret == -1) {
         return ret;
     }
@@ -60,14 +58,14 @@ int main(int argc,char *argv[])
         perror ("epoll_create");    
         return -1;    
     }       
-    struct epoll_event event;   // 告诉内核要监听什么事件    
+  /*  struct epoll_event event;   // 告诉内核要监听什么事件    
     event.data.fd = 0;     //监听套接字  
     event.events = EPOLLIN; // 表示对应的文件描述符可以读  
     ret = epoll_ctl(epfd, EPOLL_CTL_ADD, 0, &event);  
     if(-1 == ret){  
         perror("epoll_ctl");  
         return -1;  
-    }    
+    }    */
     addfd(epfd,tinyServer->GetScoketfd());
 
     while(1)  
@@ -94,12 +92,7 @@ int main(int argc,char *argv[])
                 {
                     struct sockaddr_in client_address;
                     socklen_t client_addrlength = sizeof( client_address );
-                    int connfd = accept( tinyServer->GetScoketfd(), ( struct sockaddr* )&client_address, &client_addrlength );
-                    if(connfd<0)
-                    {
-                        perror("accept err \n");
-                        continue;
-                    }
+                    int connfd = tinyServer->Accept();
                     addfd( epfd, connfd );
                 }
                 else
