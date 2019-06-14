@@ -19,5 +19,23 @@ namespace TinyServer{
         int Socketfd;
 
     };
+
+    class  
+    {
+    private:
+        /* data */
+    public:
+         (/* args */);
+        ~ ();
+    };
+    
+     :: (/* args */)
+    {
+    }
+    
+     ::~ ()
+    {
+    }
+    
 }
 
