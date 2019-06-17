@@ -16,19 +16,19 @@
 #define MAX_EVENT_NUMBER 1024
 #define TCP_BUFFER_SIZE 512
 #define UDP_BUFFER_SIZE 1024
-void addsig(int sig,void( handler )(int),bool restart=true)
+/* void addsig(int sig,void( handler )(int),bool restart=true)
 {
     struct sigaction sa;
     memset(&sa,'\0',sizeof(sa));
     sa.sa_handler=handler;
     if(restart)
     {
-        sa.sa_flags |=SA_RESTART;
+        sa.sa_flags |= SA_RESTART;
     }
     sigfillset(&sa.sa_mask);
     assert(sigaction(sig,&sa,NULL)!=-1);
 }
-
+*/
 int setnonblocking(int fd)
 {
     int old_option = fcntl(fd,F_GETFL);
@@ -79,10 +79,10 @@ int main(int argc,char *argv[])
         return -1;  
     }    */
     addfd(epfd,tinyServer->GetScoketfd());
-    addsig(SIGCHLD,sig_handler);
-    addsig(SIGTREM,sig_handler);
-    addsig(SIGINT,sig_handler);
-    addsig(SIGPIPE,SIG_IGN);
+  //  addsig(SIGCHLD,sig_handler);
+  //  addsig(SIGTREM,sig_handler);
+ //   addsig(SIGINT,sig_handler);
+ //   addsig(SIGPIPE,SIG_IGN);
     while(1)  
     {     
         // 监视并等待多个文件（标准输入，udp套接字）描述符的属性变化（是否可读）    

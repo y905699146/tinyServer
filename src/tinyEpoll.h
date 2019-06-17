@@ -20,22 +20,5 @@ namespace TinyServer{
 
     };
 
-    class  
-    {
-    private:
-        /* data */
-    public:
-         (/* args */);
-        ~ ();
-    };
-    
-     :: (/* args */)
-    {
-    }
-    
-     ::~ ()
-    {
-    }
-    
 }
 

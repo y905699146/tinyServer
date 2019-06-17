@@ -1,5 +1,5 @@
 #1. cmake version 
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.10.2)
 
 #2. project name
 PROJECT(tinyServer)

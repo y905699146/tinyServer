@@ -3,7 +3,7 @@
 #include<chrono>
 #include "threadpool.h"
 
-int main()
+int xxx()
 {
     ThreadPool pool(4);
     std::vector< std::future<int> >results;

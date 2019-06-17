@@ -27,7 +27,7 @@ int TinyEpoll::CreateSocket()
         设置为 1,0表示套接字关闭时，TCP丢弃保留在发送缓存区的数据并发送给RST给对方
     */
     struct linger tmp={1,0};
-    setsocketopt(Socketfd,SOL_SOCKET,SO_LINGER,&tmp,sizeof(tmp));
+    setsockopt(Socketfd,SOL_SOCKET,SO_LINGER,&tmp,sizeof(tmp));
 }
 int TinyEpoll::Listen(int backlog)
 {
