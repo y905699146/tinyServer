@@ -82,7 +82,9 @@ int main(int argc,char *argv[])
   //  addsig(SIGCHLD,sig_handler);
   //  addsig(SIGTREM,sig_handler);
  //   addsig(SIGINT,sig_handler);
- //   addsig(SIGPIPE,SIG_IGN);
+ //
+ 
+    addsig(SIGPIPE,SIG_IGN);
     while(1)  
     {     
         // 监视并等待多个文件（标准输入，udp套接字）描述符的属性变化（是否可读）    
